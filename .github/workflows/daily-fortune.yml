@@ -1,0 +1,46 @@
+name: Daily Fortune Service
+
+on:
+  schedule:
+    # 每天早上8点（UTC时间0点）运行
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  send_daily_fortune:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Create .env file
+      run: |
+        echo "DEEPSEEK_API_KEY=${{ secrets.DEEPSEEK_API_KEY }}" >> .env
+        echo "EMAIL_USER=${{ secrets.EMAIL_USER }}" >> .env
+        echo "EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}" >> .env
+        echo "SMTP_SERVER=${{ secrets.SMTP_SERVER }}" >> .env
+        echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
+        echo "USER_NAME=${{ secrets.USER_NAME }}" >> .env
+        echo "BIRTH_YEAR=${{ secrets.BIRTH_YEAR }}" >> .env
+        echo "BIRTH_MONTH=${{ secrets.BIRTH_MONTH }}" >> .env
+        echo "BIRTH_DAY=${{ secrets.BIRTH_DAY }}" >> .env
+        echo "BIRTH_HOUR=${{ secrets.BIRTH_HOUR }}" >> .env
+        echo "BIRTH_GENDER=${{ secrets.BIRTH_GENDER }}" >> .env
+        echo "SEND_TIME=${{ secrets.SEND_TIME }}" >> .env
+        
+    - name: Run daily fortune service
+      run: python single_run.py
+      
+    - name: Log completion
+      run: echo "Daily fortune email sent successfully at $(date)"

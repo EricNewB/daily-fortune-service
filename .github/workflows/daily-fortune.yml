@@ -2,8 +2,8 @@ name: Daily Fortune Service
 
 on:
   schedule:
-    # 每天早上8点（UTC时间0点）运行
-    - cron: '0 0 * * *'
+    # 每天早上8点（韩国时间KST），对应UTC时间前一天晚上11点
+    - cron: '0 23 * * *'
   workflow_dispatch:  # 允许手动触发
 
 jobs:
@@ -43,4 +43,4 @@ jobs:
       run: python single_run.py
       
     - name: Log completion
-      run: echo "Daily fortune email sent successfully at $(date)"
+      run: echo "Daily fortune email sent successfully at $(date)" 

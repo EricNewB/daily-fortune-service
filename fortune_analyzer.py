@@ -1,6 +1,6 @@
 import requests
 import json
-from datetime import datetime, date
+from datetime import datetime, date, timezone, timedelta
 from config import Config
 
 class FortuneAnalyzer:
@@ -9,7 +9,13 @@ class FortuneAnalyzer:
     def __init__(self):
         self.api_key = Config.DEEPSEEK_API_KEY
         self.base_url = Config.DEEPSEEK_BASE_URL
+        # 设置韩国时区 (UTC+9)
+        self.korea_tz = timezone(timedelta(hours=9))
         
+    def get_korea_time(self):
+        """获取韩国时间"""
+        return datetime.now(self.korea_tz)
+    
     def get_bazi_info(self):
         """获取生辰八字信息"""
         return {
@@ -53,8 +59,9 @@ class FortuneAnalyzer:
     def analyze_daily_fortune(self):
         """分析每日运势"""
         try:
-            today = date.today().strftime('%Y年%m月%d日')
-            print(f"🔍 开始分析运势... 日期: {today}")
+            korea_time = self.get_korea_time()
+            today = korea_time.strftime('%Y年%m月%d日')
+            print(f"🔍 开始分析运势... 日期: {today} (韩国时间)")
             
             # 检查API key配置
             if not self.api_key or self.api_key == 'your_deepseek_api_key_here':
@@ -116,6 +123,7 @@ class FortuneAnalyzer:
     
     def format_fortune_content(self, content, today):
         """格式化运势内容"""
+        korea_time = self.get_korea_time()
         formatted_content = f"""
 🌟 {Config.USER_NAME}的每日运势 - {today} 🌟
 
@@ -123,7 +131,7 @@ class FortuneAnalyzer:
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💫 愿您今天拥有美好的一天！
-由DeepSeek AI智能分析提供 | 生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+由DeepSeek AI智能分析提供 | 生成时间：{korea_time.strftime('%Y-%m-%d %H:%M:%S KST')}
 """
         return formatted_content
     

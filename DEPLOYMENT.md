@@ -30,8 +30,9 @@
 
 ### 3. 时区说明
 
-GitHub Actions使用UTC时间，当前设置为UTC 00:00运行，对应：
-- 北京时间：08:00
+GitHub Actions使用UTC时间，当前设置为UTC 23:00运行，对应：
+- 韩国时间：08:00 (KST, UTC+9)
+- 北京时间：07:00 (CST, UTC+8)
 - 如需调整时间，修改`.github/workflows/daily-fortune.yml`中的cron表达式
 
 ### 4. 手动测试
@@ -43,7 +44,7 @@ GitHub Actions使用UTC时间，当前设置为UTC 00:00运行，对应：
 
 ## 📅 运行时间表
 
-- **自动运行**：每天早上8点（北京时间）
+- **自动运行**：每天早上8点（韩国时间KST）
 - **手动运行**：随时可在Actions页面手动触发
 
 ## 🔍 监控和日志

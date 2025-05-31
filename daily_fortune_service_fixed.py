@@ -1,6 +1,6 @@
 import schedule
 import time
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from fortune_analyzer import FortuneAnalyzer
 from email_sender import EmailSender
 from config import Config
@@ -11,11 +11,18 @@ class DailyFortuneService:
     def __init__(self):
         self.analyzer = FortuneAnalyzer()
         self.email_sender = EmailSender()
+        # 设置韩国时区 (UTC+9)
+        self.korea_tz = timezone(timedelta(hours=9))
         
+    def get_korea_time(self):
+        """获取韩国时间"""
+        return datetime.now(self.korea_tz)
+    
     def send_daily_fortune(self):
         """发送每日运势"""
         try:
-            print(f"🔮 开始生成每日运势... {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            korea_time = self.get_korea_time()
+            print(f"🔮 开始生成每日运势... {korea_time.strftime('%Y-%m-%d %H:%M:%S KST')}")
             
             # 分析运势
             fortune_content = self.analyzer.analyze_daily_fortune()
@@ -85,7 +92,7 @@ class DailyFortuneService:
     def send_now(self):
         """立即发送运势（用于测试）"""
         print("🚀 立即发送每日运势...")
-        self.send_daily_fortune()
+        return self.send_daily_fortune()
 
 def main():
     """主函数"""

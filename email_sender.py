@@ -2,7 +2,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.header import Header
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import re
 from config import Config
 
@@ -14,6 +14,12 @@ class EmailSender:
         self.smtp_port = Config.SMTP_PORT
         self.email_user = Config.EMAIL_USER
         self.email_password = Config.EMAIL_PASSWORD
+        # 设置韩国时区 (UTC+9)
+        self.korea_tz = timezone(timedelta(hours=9))
+    
+    def get_korea_time(self):
+        """获取韩国时间"""
+        return datetime.now(self.korea_tz)
     
     def send_fortune_email(self, fortune_content):
         """发送运势邮件"""
@@ -23,7 +29,8 @@ class EmailSender:
             msg['From'] = self.email_user  # QQ邮箱要求简单格式
             msg['To'] = self.email_user
             
-            today = datetime.now().strftime('%Y年%m月%d日')
+            korea_time = self.get_korea_time()
+            today = korea_time.strftime('%Y年%m月%d日')
             msg['Subject'] = Header(f"🌟 {Config.USER_NAME}的每日运势 - {today}", 'utf-8')
             
             # 邮件正文
@@ -39,7 +46,8 @@ class EmailSender:
             server.sendmail(self.email_user, [self.email_user], text)
             server.quit()
             
-            print(f"✅ 运势邮件发送成功！发送时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            korea_time_str = korea_time.strftime('%Y-%m-%d %H:%M:%S KST')
+            print(f"✅ 运势邮件发送成功！发送时间：{korea_time_str}")
             return True
             
         except Exception as e:
@@ -101,9 +109,13 @@ class EmailSender:
         return ''.join(html_paragraphs)
     
     def create_html_content(self, fortune_content):
-        """创建HTML格式的邮件内容"""
-        # 转换markdown内容为HTML
+        """创建HTML格式邮件内容"""
+        # 处理换行和格式化
         formatted_content = self.markdown_to_html(fortune_content)
+        
+        # 获取韩国时间
+        korea_time = self.get_korea_time()
+        korea_time_str = korea_time.strftime('%Y年%m月%d日 %H:%M:%S')
         
         html_template = f"""
 <!DOCTYPE html>
@@ -111,119 +123,89 @@ class EmailSender:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>每日运势</title>
     <style>
         body {{
-            font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
             line-height: 1.6;
             color: #333;
-            max-width: 650px;
-            margin: 0 auto;
-            padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
         }}
         .container {{
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            margin: 20px 0;
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
         }}
         .header {{
+            background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            color: #fff;
             text-align: center;
-            margin-bottom: 30px;
-            padding: 25px;
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            border-radius: 15px;
-            border: 3px solid #f8f9fa;
+            padding: 30px 20px;
         }}
         .header h1 {{
-            color: #d63384;
             margin: 0;
             font-size: 28px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }}
         .header p {{
-            color: #6f42c1;
             margin: 10px 0 0 0;
             font-size: 16px;
-            font-style: italic;
+            opacity: 0.9;
         }}
         .content {{
-            font-size: 16px;
-            line-height: 1.8;
-            color: #2c3e50;
-        }}
-        .section-title {{
-            font-size: 20px;
-            font-weight: bold;
-            color: #e91e63;
-            margin: 25px 0 15px 0;
-            padding: 10px 15px;
-            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
-            border-radius: 10px;
-            border-left: 5px solid #e91e63;
+            padding: 30px;
+            background: #fff;
         }}
         .content-section {{
-            margin: 15px 0;
+            margin-bottom: 20px;
             padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 3px solid #17a2b8;
+            background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+            border-radius: 8px;
+            border-left: 4px solid #ff9a9e;
         }}
         .content-line {{
             margin: 8px 0;
             padding: 5px 0;
         }}
+        .section-title {{
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 18px;
+            margin: 20px 0 10px 0;
+            padding: 10px;
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 8px;
+            text-align: center;
+        }}
         .list-item {{
             margin: 8px 0;
             padding: 8px 15px;
-            background: white;
-            border-radius: 8px;
-            border-left: 3px solid #28a745;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background: linear-gradient(120deg, #f093fb 0%, #f5576c 100%);
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 3px solid #ff9a9e;
         }}
         .footer {{
+            background: linear-gradient(45deg, #764ba2 0%, #667eea 100%);
+            color: white;
             text-align: center;
-            margin-top: 40px;
             padding: 25px;
-            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-            border-radius: 15px;
             font-size: 14px;
-            color: #6c757d;
-            border: 2px solid #e9ecef;
         }}
         .footer p {{
             margin: 8px 0;
         }}
         .emoji {{
-            font-size: 18px;
+            font-size: 20px;
             margin: 0 5px;
         }}
-        strong {{
-            color: #dc3545;
-            font-weight: bold;
-        }}
-        em {{
-            color: #6f42c1;
-            font-style: italic;
-        }}
-        h1, h2, h3 {{
-            color: #e91e63;
-            margin: 20px 0 10px 0;
-            padding: 8px 12px;
-            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
-            border-radius: 8px;
-            border-left: 4px solid #e91e63;
-        }}
-        h1 {{
-            font-size: 22px;
-        }}
-        h2 {{
-            font-size: 20px;
-        }}
-        h3 {{
+        .divider {{
+            text-align: center;
+            margin: 25px 0;
             font-size: 18px;
         }}
         hr {{
@@ -237,6 +219,10 @@ class EmailSender:
             background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
             padding: 3px 8px;
             border-radius: 6px;
+            font-weight: bold;
+        }}
+        .timezone-info {{
+            color: #f39c12;
             font-weight: bold;
         }}
     </style>
@@ -255,7 +241,7 @@ class EmailSender:
         <div class="footer">
             <p><span class="emoji">🤖</span> 由 <span class="highlight">EricChen AIlab</span> 智能分析提供</p>
             <p><span class="emoji">📧</span> 如需修改配置，请联系管理员</p>
-            <p><span class="emoji">⏰</span> 发送时间：{datetime.now().strftime('%Y年%m月%d日 %H:%M:%S')}</p>
+            <p><span class="emoji">⏰</span> 发送时间：<span class="timezone-info">{korea_time_str} (韩国时间)</span></p>
             <p><span class="emoji">💝</span> 祝您今天心情愉快，万事如意！</p>
         </div>
     </div>
@@ -266,8 +252,9 @@ class EmailSender:
     
     def send_test_email(self):
         """发送测试邮件"""
+        korea_time = self.get_korea_time()
         test_content = f"""
-🌟 {Config.USER_NAME}的每日运势测试 - {datetime.now().strftime('%Y年%m月%d日')} 🌟
+🌟 {Config.USER_NAME}的每日运势测试 - {korea_time.strftime('%Y年%m月%d日')} 🌟
 
 🧪 **这是一封测试邮件**
 
@@ -280,14 +267,17 @@ class EmailSender:
 🔸 HTML格式是否正确显示
 🔸 中文是否正常显示
 🔸 emoji表情是否显示正常
+🔸 韩国时区时间显示是否正确
 
 **今日测试运势：**
 🔸 **整体运势**：测试顺利，配置成功！
 🔸 **技术运势**：代码运行良好，bug远离！
 🔸 **心情运势**：看到美丽邮件，心情愉悦！
+🔸 **时区运势**：韩国时间显示正确，准时无误！
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💫 如果一切正常，每日运势服务就可以开始工作了！
+⏰ 当前韩国时间：{korea_time.strftime('%Y年%m月%d日 %H:%M:%S KST')}
         """
         
         return self.send_fortune_email(test_content) 

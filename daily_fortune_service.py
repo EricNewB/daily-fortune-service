@@ -12,27 +12,27 @@ class DailyFortuneService:
         self.analyzer = FortuneAnalyzer()
         self.email_sender = EmailSender()
         
-def send_daily_fortune(self):
-    """发送每日运势"""
-    try:
-        print(f"🔮 开始生成每日运势... {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        
-        # 分析运势
-        fortune_content = self.analyzer.analyze_daily_fortune()
-        
-        # 发送邮件
-        success = self.email_sender.send_fortune_email(fortune_content)
-        
-        if success:
-            print("✅ 每日运势发送完成！")
-            return True
-        else:
-            print("❌ 每日运势发送失败！")
-            return False
+    def send_daily_fortune(self):
+        """发送每日运势"""
+        try:
+            print(f"🔮 开始生成每日运势... {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             
-    except Exception as e:
-        print(f"❌ 服务执行出错: {e}")
-        return False
+            # 分析运势
+            fortune_content = self.analyzer.analyze_daily_fortune()
+            
+            # 发送邮件
+            success = self.email_sender.send_fortune_email(fortune_content)
+            
+            if success:
+                print("✅ 每日运势发送完成！")
+                return True
+            else:
+                print("❌ 每日运势发送失败！")
+                return False
+                
+        except Exception as e:
+            print(f"❌ 服务执行出错: {e}")
+            return False
     
     def test_service(self):
         """测试服务"""
@@ -85,7 +85,7 @@ def send_daily_fortune(self):
     def send_now(self):
         """立即发送运势（用于测试）"""
         print("🚀 立即发送每日运势...")
-        self.send_daily_fortune()
+        return self.send_daily_fortune()
 
 def main():
     """主函数"""
@@ -118,4 +118,4 @@ def main():
             print("❌ 无效选项，请重试")
 
 if __name__ == "__main__":
-    main() 
+    main()

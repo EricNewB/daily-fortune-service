@@ -1,0 +1,29 @@
+# QQ邮箱配置示例
+# 请将以下内容复制到您的 .env 文件中
+
+# DeepSeek API配置
+DEEPSEEK_API_KEY=sk-039fb3e2ddde4569baf2f17eda83c2d3
+
+# 邮件配置 - QQ邮箱
+SMTP_SERVER=smtp.qq.com
+SMTP_PORT=587
+EMAIL_USER=659521082@qq.com
+EMAIL_PASSWORD=gylguyhtjhsxbchi
+
+# 个人信息配置
+USER_NAME=Chen
+BIRTH_YEAR=1997
+BIRTH_MONTH=2
+BIRTH_DAY=3
+BIRTH_HOUR=14
+BIRTH_GENDER=男
+
+# 运势发送时间（24小时制）
+SEND_TIME=08:00
+
+# QQ邮箱授权码获取步骤：
+# 1. 登录QQ邮箱网页版
+# 2. 设置 → 账户
+# 3. 开启SMTP服务
+# 4. 生成授权码（需要手机验证）
+# 5. 将16位授权码填入EMAIL_PASSWORD 

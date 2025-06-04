@@ -85,7 +85,7 @@ class DailyFortuneService:
     def send_now(self):
         """立即发送运势（用于测试）"""
         print("🚀 立即发送每日运势...")
-        self.send_daily_fortune()
+        return self.send_daily_fortune()
 
 def main():
     """主函数"""

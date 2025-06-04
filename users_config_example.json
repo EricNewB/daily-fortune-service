@@ -1,0 +1,20 @@
+[
+  {
+    "email": "659521082@qq.com",
+    "user_name": "Chen",
+    "birth_year": "1997",
+    "birth_month": "2",
+    "birth_day": "3",
+    "birth_hour": "14",
+    "birth_gender": "男"
+  },
+  {
+    "email": "2267542935@qq.com",
+    "user_name": "User2",
+    "birth_year": "1998",
+    "birth_month": "5",
+    "birth_day": "12",
+    "birth_hour": "8",
+    "birth_gender": "女"
+  }
+]

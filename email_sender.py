@@ -21,17 +21,19 @@ class EmailSender:
         """获取韩国时间"""
         return datetime.now(self.korea_tz)
     
-    def send_fortune_email(self, fortune_content):
+    def send_fortune_email(self, fortune_content, recipient_email=None, user_name=None):
         """发送运势邮件"""
         try:
             # 创建邮件对象
             msg = MIMEMultipart()
+            recipient = recipient_email or self.email_user
             msg['From'] = self.email_user  # QQ邮箱要求简单格式
-            msg['To'] = self.email_user
+            msg['To'] = recipient
             
             korea_time = self.get_korea_time()
             today = korea_time.strftime('%Y年%m月%d日')
-            msg['Subject'] = Header(f"🌟 {Config.USER_NAME}的每日运势 - {today}", 'utf-8')
+            name = user_name or Config.USER_NAME
+            msg['Subject'] = Header(f"🌟 {name}的每日运势 - {today}", 'utf-8')
             
             # 邮件正文
             html_content = self.create_html_content(fortune_content)
@@ -43,7 +45,7 @@ class EmailSender:
             server.login(self.email_user, self.email_password)
             
             text = msg.as_string()
-            server.sendmail(self.email_user, [self.email_user], text)
+            server.sendmail(self.email_user, [recipient], text)
             server.quit()
             
             korea_time_str = korea_time.strftime('%Y-%m-%d %H:%M:%S KST')
@@ -250,15 +252,16 @@ class EmailSender:
         """
         return html_template
     
-    def send_test_email(self):
+    def send_test_email(self, recipient_email=None, user_name=None):
         """发送测试邮件"""
         korea_time = self.get_korea_time()
+        name = user_name or Config.USER_NAME
         test_content = f"""
-🌟 {Config.USER_NAME}的每日运势测试 - {korea_time.strftime('%Y年%m月%d日')} 🌟
+🌟 {name}的每日运势测试 - {korea_time.strftime('%Y年%m月%d日')} 🌟
 
 🧪 **这是一封测试邮件**
 
-亲爱的{Config.USER_NAME}，您好！
+亲爱的{name}，您好！
 
 这是每日运势服务的测试邮件。如果您收到了这封邮件，说明邮件配置正确！
 
@@ -279,5 +282,5 @@ class EmailSender:
 💫 如果一切正常，每日运势服务就可以开始工作了！
 ⏰ 当前韩国时间：{korea_time.strftime('%Y年%m月%d日 %H:%M:%S KST')}
         """
-        
-        return self.send_fortune_email(test_content) 
+
+        return self.send_fortune_email(test_content, recipient_email, user_name)

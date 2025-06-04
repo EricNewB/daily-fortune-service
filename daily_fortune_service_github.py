@@ -15,20 +15,28 @@ class DailyFortuneService:
     def send_daily_fortune(self):
         """发送每日运势"""
         try:
-            print(f"🔮 开始生成每日运势... {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            
-            # 分析运势
-            fortune_content = self.analyzer.analyze_daily_fortune()
-            
-            # 发送邮件
-            success = self.email_sender.send_fortune_email(fortune_content)
-            
-            if success:
-                print("✅ 每日运势发送完成！")
-                return True
-            else:
-                print("❌ 每日运势发送失败！")
-                return False
+            users = Config.get_users()
+            all_success = True
+            for user in users:
+                print(
+                    f"🔮 开始生成每日运势... {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} 用户: {user.get('user_name')}"
+                )
+
+                fortune_content = self.analyzer.analyze_daily_fortune(user)
+
+                success = self.email_sender.send_fortune_email(
+                    fortune_content,
+                    user.get('email'),
+                    user.get('user_name'),
+                )
+
+                if success:
+                    print(f"✅ 已向 {user.get('email')} 发送运势")
+                else:
+                    print(f"❌ 向 {user.get('email')} 发送失败")
+                    all_success = False
+
+            return all_success
                 
         except Exception as e:
             print(f"❌ 服务执行出错: {e}")
@@ -43,19 +51,19 @@ class DailyFortuneService:
             Config.validate_config()
             print("✅ 配置验证通过")
             
-            # 发送测试邮件
-            if self.email_sender.send_test_email():
-                print("✅ 测试邮件发送成功！")
-                
-                # 测试运势分析
+            users = Config.get_users()
+            all_success = True
+            for user in users:
+                if self.email_sender.send_test_email(user.get('email'), user.get('user_name')):
+                    print(f"✅ 测试邮件已发送至 {user.get('email')}")
+                else:
+                    print(f"❌ 测试邮件发送至 {user.get('email')} 失败")
+                    all_success = False
+
                 print("🔮 测试运势分析...")
-                test_fortune = self.analyzer.analyze_daily_fortune()
-                print("✅ 运势分析测试完成")
-                
-                return True
-            else:
-                print("❌ 测试邮件发送失败")
-                return False
+                self.analyzer.analyze_daily_fortune(user)
+
+            return all_success
                 
         except Exception as e:
             print(f"❌ 服务测试失败: {e}")
@@ -65,8 +73,9 @@ class DailyFortuneService:
         """启动定时任务"""
         print(f"🚀 每日运势服务启动中...")
         print(f"⏰ 每日发送时间设置为: {Config.SEND_TIME}")
-        print(f"👤 用户姓名: {Config.USER_NAME}")
-        print(f"📧 邮件地址: {Config.EMAIL_USER}")
+        users = Config.get_users()
+        for u in users:
+            print(f"👤 用户姓名: {u.get('user_name')} | 邮件: {u.get('email')}")
         
         # 设置定时任务
         schedule.every().day.at(Config.SEND_TIME).do(self.send_daily_fortune)

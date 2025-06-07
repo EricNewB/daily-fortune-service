@@ -11,6 +11,10 @@ class Config:
     # DeepSeek API配置
     DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
     DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1"
+
+    # OpenAI API配置（备用）
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+    OPENAI_BASE_URL = os.getenv('OPENAI_BASE_URL', 'https://api.openai.com/v1')
     
     # 邮件配置
     SMTP_SERVER = os.getenv('SMTP_SERVER', 'smtp.gmail.com')  # 默认Gmail
@@ -59,6 +63,9 @@ class Config:
         """验证配置是否完整"""
         if not cls.DEEPSEEK_API_KEY:
             raise ValueError("缺少必要配置: DEEPSEEK_API_KEY")
+
+        if not cls.OPENAI_API_KEY:
+            print("⚠️ 未设置OPENAI_API_KEY，将在DeepSeek失败时使用本地备用内容")
 
         if cls.USERS_FILE and os.path.exists(cls.USERS_FILE):
             users = cls.get_users()

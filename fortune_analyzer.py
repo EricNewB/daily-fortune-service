@@ -9,6 +9,8 @@ class FortuneAnalyzer:
     def __init__(self):
         self.api_key = Config.DEEPSEEK_API_KEY
         self.base_url = Config.DEEPSEEK_BASE_URL
+        self.openai_api_key = Config.OPENAI_API_KEY
+        self.openai_base_url = Config.OPENAI_BASE_URL
         # 设置韩国时区 (UTC+9)
         self.korea_tz = timezone(timedelta(hours=9))
         
@@ -76,6 +78,10 @@ class FortuneAnalyzer:
             # 检查API key配置
             if not self.api_key or self.api_key == 'your_deepseek_api_key_here':
                 print("❌ 错误：DeepSeek API key未配置或使用默认值")
+                prompt = self.create_fortune_prompt(today, user_info)
+                openai_content = self.call_openai_api(prompt)
+                if openai_content:
+                    return self.format_fortune_content(openai_content, today, user_info, provider="OpenAI")
                 return self.get_fallback_fortune(today, user_info)
             
             print(f"🔑 API Key配置检查通过 (长度: {len(self.api_key)})")
@@ -118,20 +124,32 @@ class FortuneAnalyzer:
             else:
                 print(f"❌ API调用失败: {response.status_code}")
                 print(f"📄 响应内容: {response.text}")
+                openai_content = self.call_openai_api(prompt)
+                if openai_content:
+                    return self.format_fortune_content(openai_content, today, user_info, provider="OpenAI")
                 return self.get_fallback_fortune(today, user_info)
                 
         except requests.exceptions.Timeout:
             print("❌ API调用超时")
+            openai_content = self.call_openai_api(prompt)
+            if openai_content:
+                return self.format_fortune_content(openai_content, today, user_info, provider="OpenAI")
             return self.get_fallback_fortune(today, user_info)
         except requests.exceptions.ConnectionError:
             print("❌ 网络连接错误")
+            openai_content = self.call_openai_api(prompt)
+            if openai_content:
+                return self.format_fortune_content(openai_content, today, user_info, provider="OpenAI")
             return self.get_fallback_fortune(today, user_info)
         except Exception as e:
             print(f"❌ 分析运势时出错: {e}")
             print(f"📝 错误类型: {type(e).__name__}")
+            openai_content = self.call_openai_api(prompt)
+            if openai_content:
+                return self.format_fortune_content(openai_content, today, user_info, provider="OpenAI")
             return self.get_fallback_fortune(today, user_info)
     
-    def format_fortune_content(self, content, today, user_info=None):
+    def format_fortune_content(self, content, today, user_info=None, provider="DeepSeek"):
         """格式化运势内容"""
         korea_time = self.get_korea_time()
         user_name = user_info.get('user_name') if user_info else Config.USER_NAME
@@ -142,7 +160,7 @@ class FortuneAnalyzer:
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💫 愿您今天拥有美好的一天！
-由DeepSeek AI智能分析提供 | 生成时间：{korea_time.strftime('%Y-%m-%d %H:%M:%S KST')}
+由{provider} AI智能分析提供 | 生成时间：{korea_time.strftime('%Y-%m-%d %H:%M:%S KST')}
 """
         return formatted_content
     
@@ -179,4 +197,47 @@ class FortuneAnalyzer:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💫 愿您今天拥有美好的一天！
 ⚠️ 备用运势内容（API连接失败）| 生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-""" 
+"""
+
+    def call_openai_api(self, prompt):
+        """调用OpenAI API获取运势"""
+        if not self.openai_api_key:
+            print("⚠️ 未配置OPENAI_API_KEY，无法使用OpenAI备用")
+            return None
+
+        headers = {
+            'Authorization': f'Bearer {self.openai_api_key}',
+            'Content-Type': 'application/json'
+        }
+
+        data = {
+            'model': 'gpt-3.5-turbo',
+            'messages': [
+                {
+                    'role': 'user',
+                    'content': prompt
+                }
+            ],
+            'temperature': 0.7,
+            'max_tokens': 2000
+        }
+
+        try:
+            print(f"🌐 正在调用OpenAI API: {self.openai_base_url}/chat/completions")
+            response = requests.post(
+                f'{self.openai_base_url}/chat/completions',
+                headers=headers,
+                json=data,
+                timeout=30
+            )
+            print(f"📡 OpenAI响应状态码: {response.status_code}")
+            if response.status_code == 200:
+                result = response.json()
+                return result['choices'][0]['message']['content']
+            else:
+                print(f"❌ OpenAI API调用失败: {response.status_code}")
+                print(f"📄 响应内容: {response.text}")
+        except Exception as e:
+            print(f"❌ OpenAI API调用异常: {e}")
+
+        return None

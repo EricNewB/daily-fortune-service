@@ -61,6 +61,10 @@ cp config_template.env .env
 # DeepSeek API配置
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
 
+# OpenAI API配置（备用，可选）
+OPENAI_API_KEY=your_openai_api_key_here
+# OPENAI_BASE_URL=https://api.openai.com/v1
+
 # 邮件配置
 SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=587
@@ -92,6 +96,7 @@ python daily_fortune_service.py
 1. 访问 [DeepSeek官网](https://www.deepseek.com) 注册账号
 2. 获取API密钥
 3. 将密钥填入 `DEEPSEEK_API_KEY`
+4. （可选）设置 `OPENAI_API_KEY`，在DeepSeek连接失败时使用OpenAI API 作为备用
 
 ### 邮件配置
 

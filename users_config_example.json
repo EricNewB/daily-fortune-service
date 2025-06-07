@@ -16,5 +16,14 @@
     "birth_day": "12",
     "birth_hour": "8",
     "birth_gender": "女"
+  },
+  {
+    "email": "2242650683@qq.com",
+    "user_name": "朱朱",
+    "birth_year": "1995",
+    "birth_month": "10",
+    "birth_day": "12",
+    "birth_hour": "3",
+    "birth_gender": "女"
   }
 ]
